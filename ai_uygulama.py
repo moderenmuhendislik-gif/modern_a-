@@ -59,7 +59,7 @@ soru = st.text_input("Köyümüzün geçmişine dair neyi görmek ve duymak isti
 
 if st.button("Hikayeyi Göster ve Anlat"):
     if soru:
-        with st.spinner('Karacaardıç'ın tozlu raflarından hikayeler ve görüntüler derleniyor...'):
+        with st.spinner("Karacaardıç'ın tozlu raflarından hikayeler ve görüntüler derleniyor..."):
             genai.configure(api_key=API_KEY)
             model = genai.GenerativeModel('gemini-1.5-flash')
             
