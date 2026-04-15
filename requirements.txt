@@ -1,3 +1,4 @@
 streamlit
 scikit-learn
 gTTS
+streamlit-mic-recorder
