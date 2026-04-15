@@ -3,10 +3,11 @@ import json
 import os
 from gtts import gTTS
 import base64
+from streamlit_mic_recorder import speech_to_text
 
 # --- SAYFA AYARLARI ---
-st.set_page_config(page_title="Moderen AI", page_icon="🔊")
-st.title("🔊 Moderen Mühendislik Sesli Asistan")
+st.set_page_config(page_title="Moderen AI", page_icon="🎙️")
+st.title("🎙️ Moderen Mühendislik Sesli Komut")
 
 # --- SESLENDİRME FONKSİYONU ---
 def seslendir(metin):
@@ -18,37 +19,26 @@ def seslendir(metin):
         md = f'<audio autoplay="true" src="data:audio/mp3;base64,{b64}">'
         st.markdown(md, unsafe_allow_html=True)
 
-# --- HAFIZA İŞLEMLERİ ---
+# --- HAFIZA ---
 if 'hafiza' not in st.session_state:
     if os.path.exists("hafiza.json"):
         with open("hafiza.json", "r", encoding="utf-8") as f:
             st.session_state.hafiza = json.load(f)
     else:
-        st.session_state.hafiza = {"merhaba": "Selam Eren Usta, Moderen Mühendislik emrinde!"}
+        st.session_state.hafiza = {"merhaba": "Selam Eren Usta!"}
 
-# --- SEKMELİ ARAYÜZ (GİDEN ÖĞRETME KISMI BURADA) ---
-tab1, tab2 = st.tabs(["💬 Asistanla Konuş", "🧠 Yeni Bilgi Öğret"])
+# --- SESLİ KOMUT BUTONU ---
+st.write("Aşağıdaki mikrofona bas ve konuş Eren Usta:")
+text = speech_to_text(language='tr', start_prompt="🎙️ Konuşmak için bas", stop_prompt="⏹️ Durdur", key='speech')
 
-with tab1:
-    soru = st.text_input("Sorunu yaz:").lower()
-    if st.button("Cevapla ve Seslendir"):
-        if soru in st.session_state.hafiza:
-            cevap = st.session_state.hafiza[soru]
-            st.success(f"AI: {cevap}")
-            seslendir(cevap)
-        else:
-            bilmiyorum = "Bunu henüz öğrenmedim Eren Usta. Diğer sekmeden bana öğretebilirsin."
-            st.error(bilmiyorum)
-            seslendir(bilmiyorum)
-
-with tab2:
-    st.subheader("Hafızayı Geliştir")
-    y_soru = st.text_input("Soru (Örn: bodor lazer):").lower()
-    y_cevap = st.text_area("Cevap:")
-    if st.button("Bilgiyi Kaydet"):
-        if y_soru and y_cevap:
-            st.session_state.hafiza[y_soru] = y_cevap
-            with open("hafiza.json", "w", encoding="utf-8") as f:
-                json.dump(st.session_state.hafiza, f, ensure_ascii=False, indent=4)
-            st.success("Bilgi hafızaya kazındı!")
-            st.balloons()
+if text:
+    st.info(f"Söylediğin: {text}")
+    soru = text.lower()
+    
+    if soru in st.session_state.hafiza:
+        cevap = st.session_state.hafiza[soru]
+        st.success(f"AI: {cevap}")
+        seslendir(cevap)
+    else:
+        st.warning("Bunu henüz bilmiyorum.")
+        seslendir("Bunu henüz bilmiyorum Eren Usta.")
